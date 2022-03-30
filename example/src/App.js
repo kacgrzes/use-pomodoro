@@ -1,13 +1,9 @@
-import React from 'react'
+import React from "react";
 
-import { useMyHook } from 'use-pomodoro'
+import { usePomodoro } from "use-pomodoro";
 
 const App = () => {
-  const example = useMyHook()
-  return (
-    <div>
-      {example}
-    </div>
-  )
-}
-export default App
+  const { state } = usePomodoro();
+  return <pre>{JSON.stringify(state, null, 2)}</pre>;
+};
+export default App;

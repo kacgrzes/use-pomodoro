@@ -10,20 +10,53 @@
 npm install --save use-pomodoro
 ```
 
-## Usage
+## Basic Usage
 
 ```tsx
-import * as React from 'react'
-
-import { useMyHook } from 'use-pomodoro'
+import * as React from "react";
+import { usePomodoro } from "use-pomodoro";
 
 const Example = () => {
-  const example = useMyHook()
+  const {
+    state,
+    dispatch,
+    start,
+    stop,
+    reset,
+    goPomodoro,
+    goShortBreak,
+    goLongBreak,
+    changeConfig,
+    formattedTimer,
+  } = usePomodoro();
+  return <div>{example}</div>;
+};
+```
+
+## Context usage
+
+```tsx
+import * as React from "react";
+import { PomodoroProvider } from "use-pomodoro";
+
+const Example = () => {
   return (
-    <div>
-      {example}
-    </div>
+    <PomodoroProvider>
+      <Navbar />
+      <App />
+      <Footer />
+    </PomodoroProvider>
   )
+};
+
+// Navbar
+const Navbar = () => {
+  const { state, start, ...rest } = usePomodoroContext();
+}
+
+// Footer
+const Footer = () => {
+  const { formattedTimer, start, stop ...rest } = usePomodoroContext();
 }
 ```
 
