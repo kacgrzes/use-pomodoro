@@ -1,6 +1,6 @@
 # use-pomodoro 🍅
 
-> Use pomodoro logic wrapped in a react hook
+> Use pomodoro logic wrapped in a react hook / no extra dependencies
 
 [![NPM](https://img.shields.io/npm/v/use-pomodoro.svg)](https://www.npmjs.com/package/use-pomodoro) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
