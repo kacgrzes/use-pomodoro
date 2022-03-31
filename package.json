@@ -1,6 +1,6 @@
 {
   "name": "use-pomodoro",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Use pomodoro logic wrapped in a react hook",
   "author": "kacgrzes",
   "license": "MIT",
