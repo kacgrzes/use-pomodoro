@@ -1,3 +1,5 @@
+![Alt Text](pomodoro.gif)
+
 # use-pomodoro 🍅
 
 > Use pomodoro logic wrapped in a react hook / no extra dependencies
@@ -143,6 +145,17 @@ npm start # runs create-react-app dev server
 ```
 
 Now, anytime you make a change to your library in `src/` or to the example app's `example/src`, `create-react-app` will live-reload your local dev server so you can iterate on your component in real-time.
+
+## TODO
+
+- [x] create example app
+- [x] add progress value for current timer
+- [x] add toggle timer function
+- [x] add pomodoros counter
+- [x] add skip forward to next timer type
+- [x] add nextType value
+- [ ] write down list of features
+- [ ] add tests
 
 ## License
 

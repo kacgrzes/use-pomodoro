@@ -6,6 +6,7 @@ import {
   useContext,
   useMemo,
   createElement,
+  useEffect,
 } from "react";
 import { useInterval } from "./useInterval";
 
@@ -15,8 +16,8 @@ type NotificationConfig = {
   time: number;
 };
 
-type PomodoroType = "pomodoro" | "shortBreak" | "longBreak";
-type PomodoroConfig = {
+export type PomodoroType = "pomodoro" | "shortBreak" | "longBreak";
+export type PomodoroConfig = {
   pomodoro: number;
   shortBreak: number;
   longBreak: number;
@@ -40,20 +41,27 @@ export const defaultConfig: PomodoroConfig = {
 };
 
 type PomodoroState = {
-  type: PomodoroType;
-  timer: number;
-  paused: boolean;
   config: PomodoroConfig;
+  paused: boolean;
+  pomodoros: number;
+  timer: number;
+  type: PomodoroType;
 };
 
 export const defaultState: PomodoroState = {
-  timer: defaultConfig.pomodoro,
-  paused: true,
-  type: "pomodoro",
   config: defaultConfig,
+  paused: true,
+  pomodoros: 0,
+  timer: defaultConfig.pomodoro,
+  type: "pomodoro",
 };
 
 type PomodoroNoPayloadActionType = "tick" | "start" | "stop" | "reset";
+
+type PomodoroNextAction = {
+  type: "next";
+  payload: PomodoroType;
+};
 
 type PomodoroChangeTypeAction = {
   type: "changeType";
@@ -70,7 +78,8 @@ type PomodoroAction =
       type: PomodoroNoPayloadActionType;
     }
   | PomodoroChangeTypeAction
-  | PomodoroChangeConfigAction;
+  | PomodoroChangeConfigAction
+  | PomodoroNextAction;
 
 // TODO: do something with it :)
 // type PomodoroCallbacks = {
@@ -105,11 +114,23 @@ const reducer = (
       };
     case "reset":
       return {
-        type: "pomodoro",
-        paused: true,
-        timer: state.config.pomodoro,
         config: state.config,
+        paused: true,
+        pomodoros: 0,
+        timer: state.config.pomodoro,
+        type: "pomodoro",
       };
+    case "next": {
+      const { type, pomodoros } = state;
+      const nextType = action.payload;
+      return {
+        ...state,
+        type: nextType,
+        timer: state.config[nextType],
+        paused: true,
+        pomodoros: type === "pomodoro" ? pomodoros + 1 : pomodoros,
+      };
+    }
     case "changeType": {
       const payload = action.payload;
       return {
@@ -137,12 +158,14 @@ const reducer = (
   }
 };
 
-const init = (state: PomodoroState) => state;
-
 const tickAction: PomodoroAction = { type: "tick" };
 const startAction: PomodoroAction = { type: "start" };
 const stopAction: PomodoroAction = { type: "stop" };
 const resetAction: PomodoroAction = { type: "reset" };
+const nextAction = (payload: PomodoroType): PomodoroAction => ({
+  type: "next",
+  payload,
+});
 const changeTypeAction = (payload: PomodoroType): PomodoroAction => ({
   type: "changeType",
   payload,
@@ -181,9 +204,29 @@ const formatTime = (timeInSeconds: string | number) => {
   return `${formattedMinutes}:${formattedSeconds}`;
 };
 
-export const usePomodoro = (config: PomodoroConfig = defaultConfig) => {
-  // reducer setup
-  const [state, dispatch] = useReducer(
+const testConfig: PomodoroConfig = {
+  pomodoro: 5,
+  shortBreak: 2,
+  longBreak: 3,
+  autoStartBreaks: false,
+  autoStartPomodoros: false,
+  longBreakInterval: 4,
+  notificationConfig: {
+    time: 5 * 60,
+    type: "last",
+  },
+};
+
+const init = (state: PomodoroState): PomodoroState => {
+  const { config } = state;
+  return {
+    ...state,
+    timer: config.pomodoro,
+  };
+};
+
+export const usePomodoro = (config: PomodoroConfig = testConfig) => {
+  const [rawState, dispatch] = useReducer(
     reducer,
     { ...defaultState, config },
     init
@@ -194,6 +237,10 @@ export const usePomodoro = (config: PomodoroConfig = defaultConfig) => {
   const start = useCallback(() => dispatch(startAction), [dispatch]);
   const stop = useCallback(() => dispatch(stopAction), [dispatch]);
   const reset = useCallback(() => dispatch(resetAction), [dispatch]);
+  const toggle = useMemo(
+    () => (rawState.paused ? start : stop),
+    [rawState.paused]
+  );
   const changeType = useCallback(
     (type: PomodoroType) => dispatch(changeTypeAction(type)),
     [dispatch]
@@ -210,9 +257,64 @@ export const usePomodoro = (config: PomodoroConfig = defaultConfig) => {
   const goLongBreak = useCallback(() => changeType("longBreak"), [changeType]);
 
   // timer setup
-  useInterval(tick, state.paused ? null : 1000);
+  useInterval(tick, rawState.paused ? null : 1000);
 
-  const formattedTimer = useMemo(() => formatTime(state.timer), [state.timer]);
+  const formattedTimer = useMemo(
+    () => formatTime(rawState.timer),
+    [rawState.timer]
+  );
+
+  const progress = useMemo(() => {
+    const { type, timer, config } = rawState;
+    const currentTimerFromConfig = config[type];
+
+    return Number((1 - timer / currentTimerFromConfig).toFixed(3));
+  }, [rawState]);
+
+  const progressInPercent = useMemo(
+    () => (progress * 100).toFixed(2) + "%",
+    [progress]
+  );
+
+  const nextType: PomodoroType = useMemo(() => {
+    const { type, config, pomodoros } = rawState;
+    if (type === "shortBreak" || type === "longBreak") {
+      return "pomodoro";
+    }
+
+    if (
+      type === "pomodoro" &&
+      pomodoros > 0 &&
+      (pomodoros + 1) % config.longBreakInterval === 0
+    ) {
+      return "longBreak";
+    }
+
+    return "shortBreak";
+  }, [rawState.type]);
+
+  const next = useCallback(
+    () => dispatch(nextAction(nextType)),
+    [dispatch, nextType]
+  );
+
+  useEffect(() => {
+    if (rawState.timer === 0) {
+      next();
+    }
+  }, [rawState.timer]);
+
+  const derivedState = {
+    formattedTimer,
+    progress,
+    progressInPercent,
+    nextType,
+  };
+
+  const state = {
+    ...rawState,
+    ...derivedState,
+  };
 
   return {
     state,
@@ -220,11 +322,12 @@ export const usePomodoro = (config: PomodoroConfig = defaultConfig) => {
     start,
     stop,
     reset,
+    toggle,
+    next,
     goPomodoro,
     goShortBreak,
     goLongBreak,
     changeConfig,
-    formattedTimer,
   };
 };
 
