@@ -156,6 +156,7 @@ Now, anytime you make a change to your library in `src/` or to the example app's
 - [x] add nextType value
 - [ ] write down list of features
 - [ ] add tests
+- [ ] export types
 
 ## License
 
