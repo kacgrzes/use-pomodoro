@@ -204,18 +204,18 @@ const formatTime = (timeInSeconds: string | number) => {
   return `${formattedMinutes}:${formattedSeconds}`;
 };
 
-const testConfig: PomodoroConfig = {
-  pomodoro: 5,
-  shortBreak: 2,
-  longBreak: 3,
-  autoStartBreaks: false,
-  autoStartPomodoros: false,
-  longBreakInterval: 4,
-  notificationConfig: {
-    time: 5 * 60,
-    type: "last",
-  },
-};
+// const testConfig: PomodoroConfig = {
+//   pomodoro: 5,
+//   shortBreak: 2,
+//   longBreak: 3,
+//   autoStartBreaks: false,
+//   autoStartPomodoros: false,
+//   longBreakInterval: 4,
+//   notificationConfig: {
+//     time: 5 * 60,
+//     type: "last",
+//   },
+// };
 
 const init = (state: PomodoroState): PomodoroState => {
   const { config } = state;
@@ -225,7 +225,7 @@ const init = (state: PomodoroState): PomodoroState => {
   };
 };
 
-export const usePomodoro = (config: PomodoroConfig = testConfig) => {
+export const usePomodoro = (config: PomodoroConfig = defaultConfig) => {
   const [rawState, dispatch] = useReducer(
     reducer,
     { ...defaultState, config },
