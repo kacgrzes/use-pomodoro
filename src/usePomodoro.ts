@@ -9,44 +9,8 @@ import {
   useEffect,
 } from "react";
 import { useInterval } from "./useInterval";
-
-type NotificationType = "last" | "every";
-type NotificationConfig = {
-  type: NotificationType;
-  time: number;
-};
-
-export type PomodoroType = "pomodoro" | "shortBreak" | "longBreak";
-export type PomodoroConfig = {
-  pomodoro: number;
-  shortBreak: number;
-  longBreak: number;
-  autoStartBreaks: boolean;
-  autoStartPomodoros: boolean;
-  longBreakInterval: number;
-  notificationConfig: NotificationConfig;
-};
-
-export const defaultConfig: PomodoroConfig = {
-  pomodoro: 25 * 60,
-  shortBreak: 5 * 60,
-  longBreak: 15 * 60,
-  autoStartBreaks: false,
-  autoStartPomodoros: false,
-  longBreakInterval: 4,
-  notificationConfig: {
-    time: 5 * 60,
-    type: "last",
-  },
-};
-
-type PomodoroState = {
-  config: PomodoroConfig;
-  paused: boolean;
-  pomodoros: number;
-  timer: number;
-  type: PomodoroType;
-};
+import { PomodoroState, PomodoroAction, PomodoroType, PomodoroConfig } from './types'
+import { defaultConfig } from './configs'
 
 export const defaultState: PomodoroState = {
   config: defaultConfig,
@@ -55,41 +19,6 @@ export const defaultState: PomodoroState = {
   timer: defaultConfig.pomodoro,
   type: "pomodoro",
 };
-
-type PomodoroNoPayloadActionType = "tick" | "start" | "stop" | "reset";
-
-type PomodoroNextAction = {
-  type: "next";
-  payload: PomodoroType;
-};
-
-type PomodoroChangeTypeAction = {
-  type: "changeType";
-  payload: PomodoroType;
-};
-
-type PomodoroChangeConfigAction = {
-  type: "changeConfig";
-  payload: Partial<PomodoroConfig>;
-};
-
-type PomodoroAction =
-  | {
-      type: PomodoroNoPayloadActionType;
-    }
-  | PomodoroChangeTypeAction
-  | PomodoroChangeConfigAction
-  | PomodoroNextAction;
-
-// TODO: do something with it :)
-// type PomodoroCallbacks = {
-//   onTick: () => void;
-//   onStart: () => void;
-//   onStop: () => void;
-//   onReset: () => void;
-//   onChangeType: (type: PomodoroType) => void;
-//   onChangeConfig: (config: Partial<PomodoroConfig>) => void;
-// };
 
 const reducer = (
   state: PomodoroState,
@@ -203,19 +132,6 @@ const formatTime = (timeInSeconds: string | number) => {
 
   return `${formattedMinutes}:${formattedSeconds}`;
 };
-
-// const testConfig: PomodoroConfig = {
-//   pomodoro: 5,
-//   shortBreak: 2,
-//   longBreak: 3,
-//   autoStartBreaks: false,
-//   autoStartPomodoros: false,
-//   longBreakInterval: 4,
-//   notificationConfig: {
-//     time: 5 * 60,
-//     type: "last",
-//   },
-// };
 
 const init = (state: PomodoroState): PomodoroState => {
   const { config } = state;
