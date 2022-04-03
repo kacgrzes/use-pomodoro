@@ -216,8 +216,8 @@ const App = () => {
   console.log(state);
   return (
     <>
-      <main className="w-screen h-screen bg-primary-100 flex justify-center items-center">
-        <div className="flex flex-row gap-4">
+      <main className="min-w-screen h-screen bg-primary-100 flex justify-center items-center">
+        <div className="flex flex-col md:flex-row gap-4">
           <div className="bg-white rounded flex-shrink">
             <PomodoroProgress />
             <div className="flex flex-col p-6">
