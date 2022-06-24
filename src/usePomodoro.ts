@@ -28,7 +28,7 @@ const reducer = (
     case "tick": {
       return {
         ...state,
-        timer: state.timer - 1,
+        timer: action.payload,
       };
     }
     case "start":
@@ -87,7 +87,10 @@ const reducer = (
   }
 };
 
-const tickAction: PomodoroAction = { type: "tick" };
+const tickAction = (payload: number): PomodoroAction => ({
+  type: "tick",
+  payload,
+});
 const startAction: PomodoroAction = { type: "start" };
 const stopAction: PomodoroAction = { type: "stop" };
 const resetAction: PomodoroAction = { type: "reset" };
@@ -141,6 +144,8 @@ const init = (state: PomodoroState): PomodoroState => {
   };
 };
 
+let currentTimerLength: number | undefined = undefined;
+let endTimestamp: number | undefined = undefined;
 export const usePomodoro = (config: PomodoroConfig = defaultConfig) => {
   const [rawState, dispatch] = useReducer(
     reducer,
@@ -149,10 +154,27 @@ export const usePomodoro = (config: PomodoroConfig = defaultConfig) => {
   );
 
   // actions
-  const tick = useCallback(() => dispatch(tickAction), [dispatch]);
-  const start = useCallback(() => dispatch(startAction), [dispatch]);
-  const stop = useCallback(() => dispatch(stopAction), [dispatch]);
-  const reset = useCallback(() => dispatch(resetAction), [dispatch]);
+  const tick = useCallback(() => {
+    if (!currentTimerLength || !endTimestamp) return console.error('something went wrong');
+    const now = new Date().valueOf();
+    const timer = Math.round((endTimestamp! - now) / 1000);
+    dispatch(tickAction(timer < 0 ? 0 : timer));
+  }, [dispatch]);
+  const start = useCallback(() => {
+    currentTimerLength = rawState.timer;
+    endTimestamp = new Date().valueOf() + rawState.timer * 1000;
+    dispatch(startAction);
+  }, [dispatch, rawState.timer]);
+  const stop = useCallback(() => {
+    currentTimerLength = undefined;
+    endTimestamp = undefined;
+    dispatch(stopAction);
+  }, [dispatch]);
+  const reset = useCallback(() => {
+    currentTimerLength = undefined;
+    endTimestamp = undefined;
+    dispatch(resetAction);
+  }, [dispatch]);
   const toggle = useMemo(
     () => (rawState.paused ? start : stop),
     [rawState.paused]

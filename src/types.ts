@@ -23,7 +23,7 @@ export type PomodoroState = {
   type: PomodoroType;
 };
 
-type PomodoroNoPayloadActionType = "tick" | "start" | "stop" | "reset";
+type PomodoroNoPayloadActionType = "start" | "stop" | "reset";
 
 type PomodoroNextAction = {
   type: "next";
@@ -46,7 +46,11 @@ export type PomodoroAction =
     }
   | PomodoroChangeTypeAction
   | PomodoroChangeConfigAction
-  | PomodoroNextAction;
+  | PomodoroNextAction
+  | {
+      type: "tick";
+      payload: number;
+    }
 
 // TODO: do something with it :)
 // type PomodoroCallbacks = {
