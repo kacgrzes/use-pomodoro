@@ -213,7 +213,6 @@ function TimerTypeTabs() {
 
 const App = () => {
   const { state, toggle, next } = usePomodoroContext();
-  console.log(state);
   return (
     <>
       <main className="min-w-screen h-screen bg-primary-100 flex justify-center items-center">

@@ -4,6 +4,17 @@ type NotificationConfig = {
   time: number;
 };
 
+export type PomodoroCallbacks = {
+  onTick?: (state: PomodoroState) => void;
+  onStart?: (state: PomodoroState) => void;
+  onStop?: (state: PomodoroState) => void;
+  onToggle?: (state: PomodoroState) => void;
+  onReset?: (state: PomodoroState) => void;
+  onNext?: (state: PomodoroState) => void;
+  onChangeType?: (state: PomodoroState) => void;
+  onChangeConfig?: (state: PomodoroState) => void;
+};
+
 export type PomodoroType = "pomodoro" | "shortBreak" | "longBreak";
 export type PomodoroConfig = {
   pomodoro: number;
@@ -47,13 +58,3 @@ export type PomodoroAction =
   | PomodoroChangeTypeAction
   | PomodoroChangeConfigAction
   | PomodoroNextAction;
-
-// TODO: do something with it :)
-// type PomodoroCallbacks = {
-//   onTick: () => void;
-//   onStart: () => void;
-//   onStop: () => void;
-//   onReset: () => void;
-//   onChangeType: (type: PomodoroType) => void;
-//   onChangeConfig: (config: Partial<PomodoroConfig>) => void;
-// };

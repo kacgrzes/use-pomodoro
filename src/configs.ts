@@ -1,4 +1,4 @@
-import { PomodoroConfig } from './types'
+import { PomodoroConfig } from "./types";
 
 export const defaultConfig: PomodoroConfig = {
   pomodoro: 25 * 60,

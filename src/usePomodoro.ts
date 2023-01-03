@@ -9,8 +9,13 @@ import {
   useEffect,
 } from "react";
 import { useInterval } from "./useInterval";
-import { PomodoroState, PomodoroAction, PomodoroType, PomodoroConfig } from './types'
-import { defaultConfig } from './configs'
+import {
+  PomodoroState,
+  PomodoroAction,
+  PomodoroType,
+  PomodoroConfig,
+} from "./types";
+import { defaultConfig } from "./configs";
 
 export const defaultState: PomodoroState = {
   config: defaultConfig,
@@ -50,13 +55,18 @@ const reducer = (
         type: "pomodoro",
       };
     case "next": {
-      const { type, pomodoros } = state;
+      const { type, pomodoros, config } = state;
       const nextType = action.payload;
+
+      const shouldRun =
+        (nextType === "pomodoro" && config.autoStartPomodoros) ||
+        (nextType !== "pomodoro" && config.autoStartBreaks);
+
       return {
         ...state,
         type: nextType,
         timer: state.config[nextType],
-        paused: true,
+        paused: !shouldRun,
         pomodoros: type === "pomodoro" ? pomodoros + 1 : pomodoros,
       };
     }
@@ -135,16 +145,22 @@ const formatTime = (timeInSeconds: string | number) => {
 
 const init = (state: PomodoroState): PomodoroState => {
   const { config } = state;
+
+  const shouldRun = state.type === "pomodoro" && config.autoStartPomodoros;
+
   return {
     ...state,
+    paused: !shouldRun,
     timer: config.pomodoro,
   };
 };
 
-export const usePomodoro = (config: PomodoroConfig = defaultConfig) => {
+export const usePomodoro = (
+  config: Partial<PomodoroConfig> = defaultConfig
+) => {
   const [rawState, dispatch] = useReducer(
     reducer,
-    { ...defaultState, config },
+    { ...defaultState, config: { ...defaultConfig, ...config } },
     init
   );
 
@@ -240,6 +256,7 @@ export const usePomodoro = (config: PomodoroConfig = defaultConfig) => {
     reset,
     toggle,
     next,
+    changeType,
     goPomodoro,
     goShortBreak,
     goLongBreak,
@@ -262,7 +279,7 @@ export const usePomodoroContext = () => {
 };
 
 type PomodoroProviderProps = {
-  config?: PomodoroConfig;
+  config?: Partial<PomodoroConfig>;
 };
 
 export const PomodoroProvider: FC<PomodoroProviderProps> = ({
